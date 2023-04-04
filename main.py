@@ -44,6 +44,11 @@ def convert_to_links(s):
                 link = "https://github.com/stacks-network/stacks-blockchain/blob/main/" + content
             elif prefix.strip().startswith("book"):
                 link = "https://github.com/clarity-lang/book/blob/main/" + content
+            elif prefix.strip().startswith("shatoshi-paper"):
+                link = "https://github.com/bitcoinbook/shatoshi-paper/blob/master/" + content
+            elif prefix.strip().startswith("bitcoinbook"):
+                link = "https://github.com/bitcoinbook/bitcoinbook/blob/develop/" + content
+
             else:
                 link = substring
         else:
