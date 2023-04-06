@@ -13,7 +13,7 @@ with open("faiss_store.pkl", "rb") as f:
     store = pickle.load(f)
 
 store.index = index
-chain = RetrievalQAWithSourcesChain.from_chain_type(llm=ChatOpenAI(temperature=0), chain_type="stuff", retriever=store.as_retriever(search_kwargs={"k": 10}))
+chain = RetrievalQAWithSourcesChain.from_chain_type(llm=ChatOpenAI(temperature=0.5), chain_type="stuff", retriever=store.as_retriever(search_kwargs={"k": 10}))
 
 # From here down is all the StreamLit UI.
 st.set_page_config(page_title="Stacks Q&A Bot", page_icon=":robot_face:")
@@ -30,36 +30,35 @@ def convert_to_links(s):
     substrings = s.split(",")
     result = []
 
+    github_repos = {
+        "docs": "https://github.com/stacks-network/docs/blob/master/",
+        "sips": "https://github.com/stacksgov/sips/blob/main/",
+        "stacks": "https://github.com/stacks-network/stacks/blob/master/",
+        "stacks-blockchain": "https://github.com/stacks-network/stacks-blockchain/blob/main/",
+        "book": "https://github.com/clarity-lang/book/blob/main/",
+        "shatoshi-paper": "https://github.com/bitcoinbook/shatoshi-paper/blob/master/",
+        "bitcoinbook": "https://github.com/bitcoinbook/bitcoinbook/blob/develop/",
+        "core-eng": "https://github.com/Trust-Machines/core-eng/blob/main/",
+        "bitcoin": "https://github.com/bitcoin/bitcoin/blob/master/",
+        "bips": "https://github.com/bitcoin/bips/blob/master/",
+        "ord": "https://github.com/casey/ord/blob/master/",
+        "awesome-ordinals": "https://github.com/crypt0biwan/awesome-ordinals/blob/main/",
+        "awesome-ordinals2": "https://github.com/neu-fi/awesome-ordinals/blob/main/"
+    }
+
     for substring in substrings:
-        # print(substring)
         if '/' in substring and 'N/A' not in substring:
             prefix, content = substring.strip()[7:].split('/', 1)
-            if prefix.strip().startswith("docs"):
-                link = "https://github.com/stacks-network/docs/blob/master/" + content
-            elif prefix.strip().startswith("sips"):
-                link = "https://github.com/stacksgov/sips/blob/main/" + content
-            elif prefix.strip().startswith("stacks"):
-                link = "https://github.com/stacks-network/stacks/blob/master/" + content
-            elif prefix.strip().startswith("stacks-blockchain"):
-                link = "https://github.com/stacks-network/stacks-blockchain/blob/main/" + content
-            elif prefix.strip().startswith("book"):
-                link = "https://github.com/clarity-lang/book/blob/main/" + content
-            elif prefix.strip().startswith("shatoshi-paper"):
-                link = "https://github.com/bitcoinbook/shatoshi-paper/blob/master/" + content
-            elif prefix.strip().startswith("bitcoinbook"):
-                link = "https://github.com/bitcoinbook/bitcoinbook/blob/develop/" + content
-
-            else:
-                link = substring
+            link = github_repos.get(prefix.strip(), substring)
+            result.append(f'\n - {link}{content}')
         else:
-            link = substring
-        result.append(f'\n - {link}')
+            result.append(f'\n - {substring}')
 
     return " ".join(result)
 
 
 def get_text():
-    input_text = st.text_input("Type/Edit your question here: ", "What is stacks?", key="input", help="Ask questions about Stacks, Clarity, Bitcoin, sBTC etc.")
+    input_text = st.text_input("Type/Edit your question here: ", "What is stacks?", key="input", help="Ask questions about Stacks, Clarity, sBTC, Bitcoin, Ordinals etc.")
     return input_text
 
 
