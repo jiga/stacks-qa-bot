@@ -172,6 +172,8 @@ def main():
             
             message(st.session_state["past"][i], is_user=True, key=str(i) + "_user")
 
+@st.cache
+def bot():
     try:
         client.run(TOKEN)
     except Exception:
@@ -197,3 +199,4 @@ async def on_message(message):
 
 if __name__ == "__main__":
     main()
+    bot()
