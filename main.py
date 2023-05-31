@@ -12,12 +12,14 @@ import os
 import discord
 from discord.ext import commands
 import re
+import asyncio
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 # Initialize Discord client
 intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
+
 client = commands.Bot(command_prefix="!", intents=intents)
 
 # From here down is all the StreamLit UI.
@@ -188,11 +190,15 @@ def main():
             output = f"Hello {message.author.mention}! \n {result['answer']}\nSources:\n {sources}"
             await message.reply(output)
 
-    try:
-        client.run(TOKEN)
-    except KeyboardInterrupt:
-        print("\nDiscordBot is shutting down due to CTRL+C.")
-        client.close()
+    @st.cache_resource
+    async def run_bot():
+        try:
+            client.run(TOKEN)
+        except KeyboardInterrupt:
+            print("\nDiscordBot is shutting down due to CTRL+C.")
+            client.close()
+
+    run_bot()
 
 if __name__ == "__main__":
     main()
