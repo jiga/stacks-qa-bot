@@ -8,6 +8,19 @@ import pickle
 import random
 import langchain
 from langchain.cache import InMemoryCache
+import os
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
+import re
+
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+# Initialize Discord client
+intents = discord.Intents.default()
+intents.messages = True
+intents.guilds = True
+client = commands.Bot(command_prefix="!", intents=intents)
 
 # From here down is all the StreamLit UI.
 st.set_page_config(page_title="Stacks Q&A Bot", page_icon=":robot_face:")
@@ -92,6 +105,16 @@ styles = [
         # "Apologetic",
     ]
 
+def remove_mentions(message_content, mentions):
+    for mention in mentions:
+        mention_string = mention.mention
+        message_content = message_content.replace(mention_string, "")
+    
+    return message_content.strip()
+
+def replace_link(match):
+    link = match.group(0)
+    return f"<{link}>"
 
 def main():
     st.header("StacksGPT : Q&A Bot")
@@ -148,6 +171,30 @@ def main():
                 st.write("")
             
             message(st.session_state["past"][i], is_user=True, key=str(i) + "_user")
+
+
+    @client.event
+    async def on_ready():
+        print(f'{client.user} has connected to Discord!')
+
+    @client.event
+    async def on_message(message):
+        if message.author == client.user:
+            return
+        print(message.content)
+        if client.user in message.mentions:
+            await message.reply(f"Hello {message.author.mention}! please wait while I think 🧠 about your question... ")
+            question = remove_mentions(message.content, message.mentions)
+            result = chain1({"question": question + '. Always put all sources at the end and always Respond in Markdown format.'})
+            sources = re.sub(r'https?://\S+', replace_link, result['sources'])
+            output = f"Hello {message.author.mention}! \n {result['answer']}\nSources:\n {sources}"
+            await message.reply(output)
+
+    try:
+        client.run(TOKEN)
+    except KeyboardInterrupt:
+        print("\nDiscordBot is shutting down due to CTRL+C.")
+        client.close()
 
 if __name__ == "__main__":
     main()
