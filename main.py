@@ -11,10 +11,8 @@ from langchain.cache import InMemoryCache
 import os
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 import re
 
-load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 # Initialize Discord client
 intents = discord.Intents.default()
