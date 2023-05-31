@@ -202,4 +202,4 @@ if __name__ == "__main__":
     main()
     if not running:
         running = True
-        bot()
+        #bot()
