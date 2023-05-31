@@ -20,7 +20,7 @@ intents = discord.Intents.default()
 intents.messages = True
 intents.guilds = True
 
-client = commands.Bot(command_prefix="!", intents=intents)
+client = discord.Client(intents=intents)
 
 # From here down is all the StreamLit UI.
 st.set_page_config(page_title="Stacks Q&A Bot", page_icon=":robot_face:")
@@ -172,34 +172,28 @@ def main():
             
             message(st.session_state["past"][i], is_user=True, key=str(i) + "_user")
 
+    try:
+        client.run(TOKEN)
+    except Exception:
+        print("\nDiscordBot is shutting down due to CTRL+C.")
+        client.close()
 
-    @client.event
-    async def on_ready():
-        print(f'{client.user} has connected to Discord!')
+@client.event
+async def on_ready():
+    print(f'{client.user} has connected to Discord!')
 
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
-        print(message.content)
-        if client.user in message.mentions:
-            await message.reply(f"Hello {message.author.mention}! please wait while I think 🧠 about your question... ")
-            question = remove_mentions(message.content, message.mentions)
-            result = chain1({"question": question + '. Always put all sources at the end and always Respond in Markdown format.'})
-            sources = re.sub(r'https?://\S+', replace_link, result['sources'])
-            output = f"Hello {message.author.mention}! \n {result['answer']}\nSources:\n {sources}"
-            await message.reply(output)
-
-    @st.cache_resource
-    async def run_bot():
-        try:
-            client.run(TOKEN)
-        except KeyboardInterrupt:
-            print("\nDiscordBot is shutting down due to CTRL+C.")
-            client.close()
-
-    run_bot()
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+    print(message.content)
+    if client.user in message.mentions:
+        await message.reply(f"Hello {message.author.mention}! please wait while I think 🧠 about your question... ")
+        question = remove_mentions(message.content, message.mentions)
+        result = chain1({"question": question + '. Always put all sources at the end and always Respond in Markdown format.'})
+        sources = re.sub(r'https?://\S+', replace_link, result['sources'])
+        output = f"Hello {message.author.mention}! \n {result['answer']}\nSources:\n {sources}"
+        await message.reply(output)
 
 if __name__ == "__main__":
     main()
-    
