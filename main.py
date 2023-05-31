@@ -197,6 +197,9 @@ async def on_message(message):
         output = f"Hello {message.author.mention}! \n {result['answer']}\nSources:\n {sources}"
         await message.reply(output)
 
+running = None
 if __name__ == "__main__":
     main()
-    bot()
+    if not running:
+        running = True
+        bot()
